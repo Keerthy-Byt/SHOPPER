@@ -4,10 +4,13 @@ const app = express();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
-const path = require("path");
+const path = require("path"); // to get access to the backend directory in the express app
 const cors = require("cors");
+const bcrypt = require("bcrypt");
 
+// to parse whatever request i get from response will automatically  through json
 app.use(express.json());
+// to connect the project to the express app on port
 app.use(cors());
 
 // Database Connection With MongoDB
@@ -15,16 +18,16 @@ mongoose.connect(
   "mongodb+srv://keerththegav:pOjey0QeyeDUG1qO@cluster0.olnvb1a.mongodb.net/ecommerce"
 );
 
-// API Creation
+// // API Creation
 
 app.get("/", (req, res) => {
   res.send("Express App is Running");
 });
 
-// Image Storage Engine
+// // Image Storage Engine
 
 const storage = multer.diskStorage({
-  destination: "./upload",
+  destination: "./upload/images",
   filename: (req, file, cb) => {
     return cb(
       null,
@@ -119,7 +122,7 @@ app.post("/removeproduct", async (req, res) => {
   });
 });
 
-// Creating API for getting all products
+// // Creating API for getting all products
 
 app.get("/allproducts", async (req, res) => {
   let products = await Product.find({});
@@ -138,7 +141,7 @@ const Users = mongoose.model("Users", {
     unique: true,
   },
   password: {
-    type: Date,
+    type: String,
   },
   cartData: {
     type: Object,
@@ -184,28 +187,32 @@ app.post("/signup", async (req, res) => {
 
 // Creating endpoint for user login
 app.post("/login", async (req, res) => {
-  let user = await Users.findOne({ email: req.body.email });
-  if (user) {
-    const passCompare = req.body.password === user.password;
-    if (passCompare) {
-      const data = {
-        user: {
-          id: user.id,
-        },
-      };
-      const token = jwt.sign(data, "secret_ecom");
-      res.json({ success: true, token });
-    } else {
-      res.json({ success: false, errors: "Wrong Password" });
+  try {
+    const user = await Users.findOne({ email: req.body.email });
+    if (!user) {
+      return res.json({ success: false, errors: "Wrong Email Id" });
     }
-  } else {
-    res.json({ success: false, errors: "Wrong Email Id" });
+
+    if (req.body.password !== user.password) {
+      return res.json({ success: false, errors: "Wrong Password" });
+    }
+
+    const data = {
+      user: {
+        id: user.id,
+      },
+    };
+    const token = jwt.sign(data, "secret_ecom");
+    res.json({ success: true, token });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ success: false, errors: "Internal Server Error" });
   }
 });
 
-// Creating endpoint for newcollection data
+// // Creating endpoint for newcollection data
 
-app.get("/newcollectioned", async (req, res) => {
+app.get("/newcollections", async (req, res) => {
   let products = await Product.find({});
   let newcollection = products.slice(1).slice(-8);
   console.log("NewCollection Fetched");
@@ -242,9 +249,9 @@ const fetchUser = async (req, res, next) => {
 app.post("/addtocart", fetchUser, async (req, res) => {
   console.log("Added", req.body.itemId);
   let userData = await Users.findOne({ _id: req.user.id });
-  userData.cartDAta[req.body.itemId] += 1;
+  userData.cartData[req.body.itemId] += 1;
   await Users.findOneAndUpdate(
-    { _id: req - user.id },
+    { _id: req.user.id },
     { cartData: userData.cartData }
   );
   res.send("Added");
@@ -256,15 +263,15 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
   console.log("removed", req.body.itemId);
   let userData = await Users.findOne({ _id: req.user.id });
   if (userData.cartData[req.body.itemId] > 0)
-    userData.cartDAta[req.body.itemId] -= 1;
+    userData.cartData[req.body.itemId] -= 1;
   await Users.findOneAndUpdate(
-    { _id: req - user.id },
+    { _id: req.user.id },
     { cartData: userData.cartData }
   );
-  res.send("Added");
+  res.send("Removed");
 });
 
-//creating endpoint to get cartdata
+// //creating endpoint to get cartdata
 
 app.post("/getcart", fetchUser, async (req, res) => {
   console.log("GetCart");
