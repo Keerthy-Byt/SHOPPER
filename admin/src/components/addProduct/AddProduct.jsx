@@ -1,8 +1,12 @@
-import "./AddProduct.css";
-import upload_area from "../../assets/upload_area.svg";
+import axios from "axios";
 import { useState } from "react";
+import upload_area from "../../assets/upload_area.svg";
+import { BASE_API_URL } from "../../utils/constants";
+import "./AddProduct.css";
+
 const AddProduct = () => {
-  const [image, setImage] = useState(false);
+  const [image, setImage] = useState(null);
+  const [errorMsg, setErrorMsg] = useState("");
   const [productDetails, setProductDetails] = useState({
     name: "",
     image: "",
@@ -12,47 +16,61 @@ const AddProduct = () => {
   });
 
   const imageHandler = (e) => {
-    setImage(e.target.files[0]);
+    // setImage(e.target.files[0]);
+    const reader = new FileReader();
+    const file = e.target.files[0];
+    console.log("file", file);
+    let fileSize = file.size.toString();
+    let fileSizeValue = "";
+
+    if (fileSize.length < 7) {
+      fileSizeValue = `${Math.round(+fileSize / 1024).toFixed(2)}kb`;
+    } else {
+      fileSizeValue = `${(Math.round(+fileSize / 1024) / 1000).toFixed(2)}MB`;
+    }
+    if (fileSizeValue.includes("MB")) {
+      return setErrorMsg("Please select file size less than 1MB");
+    } else {
+      setErrorMsg("");
+    }
+
+    reader.readAsDataURL(file);
+    reader.onloadend = function () {
+      setImage(reader.result);
+    };
   };
+
   const changeHandler = (e) => {
     setProductDetails({ ...productDetails, [e.target.name]: e.target.value });
   };
 
   const Add_Product = async () => {
-    console.log(productDetails);
-    let responseData;
-    let product = productDetails;
+    try {
+      console.log(productDetails);
+      // let responseData;
+      let product = productDetails;
 
-    let formData = new FormData();
-    formData.append("product", image);
-
-    await fetch("http://localhost:4000/upload", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-      },
-      body: formData,
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        responseData = data;
+      let formData = new FormData();
+      formData.append("product", image);
+      const { data } = await axios.post(`${BASE_API_URL}/upload`, {
+        image,
       });
+      console.log("response", data);
+      product.image = data.image_url;
 
-    if (responseData.success) {
-      product.image = responseData.image_url;
-      console.log(product);
-      await fetch("http://localhost:4000/addproduct", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(product),
-      })
-        .then((resp) => resp.json())
-        .then((data) => {
-          data.success ? alert("Product Added") : alert("Failed");
-        });
+      const addproductResponse = await axios.post(
+        `${BASE_API_URL}/addproduct`,
+        product
+      );
+      console.log("Add product response:", addproductResponse.data);
+
+      if (addproductResponse.data.success) {
+        alert("Product Added");
+      } else {
+        alert("Failed to add product");
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -106,7 +124,7 @@ const AddProduct = () => {
       <div className="addproduct-itemfield">
         <label htmlFor="file-input">
           <img
-            src={image ? URL.createObjectURL(image) : upload_area}
+            src={image ? image : upload_area}
             className="addproduct-thumnail-img"
             alt=""
           />
@@ -119,6 +137,7 @@ const AddProduct = () => {
           hidden
         />
       </div>
+      {errorMsg && <p style={{ color: "#ff0000" }}>{errorMsg}</p>}
       <button
         onClick={() => {
           Add_Product();

@@ -1,15 +1,18 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
-import "./ListProduct.css";
 import cross_icon from "../../assets/cross_icon.png";
+import { BASE_API_URL } from "../../utils/constants";
+import "./ListProduct.css";
 const ListProduct = () => {
   const [allproducts, setAllProducts] = useState([]);
 
   const fetchInfo = async () => {
-    await fetch("http://localhost:4000/allproducts")
-      .then((res) => res.json())
-      .then((data) => {
-        setAllProducts(data);
-      });
+    try {
+      const response = await axios.get(`${BASE_API_URL}/allproducts`);
+      setAllProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching product info:", error);
+    }
   };
 
   useEffect(() => {
@@ -17,7 +20,7 @@ const ListProduct = () => {
   }, []);
 
   const remove_product = async (id) => {
-    await fetch("http://localhost:4000/removeproduct", {
+    await fetch(`${BASE_API_URL}/removeproduct`, {
       method: "POST",
       headers: {
         Accept: "application/json",

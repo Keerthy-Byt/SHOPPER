@@ -1,14 +1,21 @@
 import "./NewCollections.css";
 import Item from "../item/Item";
 import { useEffect, useState } from "react";
+import { BASE_API_URL } from "../../utils/constants";
+import axios from "axios";
 const NewCollections = () => {
   const [new_collections, setNew_collections] = useState([]);
-
   useEffect(() => {
-    fetch("http://localhost:4000/newcollections")
-      .then((response) => response.json())
-      .then((data) => setNew_collections(data));
+    axios
+      .get(`${BASE_API_URL}/newcollections`)
+      .then((response) => {
+        setNew_collections(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching new collections:", error);
+      });
   }, []);
+
   return (
     <div className="new-collections">
       <h1>NEW COLLECTIONS</h1>

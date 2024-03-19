@@ -1,10 +1,10 @@
-import "./Navbar.css";
-import logo from "../assets/logo.png";
-import cart_icon from "../assets/cart_icon.png";
 import { useContext, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShopContext } from "../../context/ShopContext";
+import cart_icon from "../assets/cart_icon.png";
 import nav_dropdown from "../assets/dropdown_icon.png";
+import logo from "../assets/logo.png";
+import "./Navbar.css";
 const Navbar = () => {
   const [menu, setMenu] = useState("shop");
   const { getTotalCartItems } = useContext(ShopContext);

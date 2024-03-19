@@ -1,11 +1,15 @@
 import "./Item.css";
 import { Link } from "react-router-dom";
+
 const Item = (props) => {
+  // const server = "https://shopperkk.onrender.com/";
+  // const imgName = props.image.split("images/")[1];
   return (
     <div className="item">
       <Link to={`/product/${props.id}`}>
         <img
           src={props.image}
+          // src={`${server}images/${imgName}`}
           alt={props.name}
           onClick={window.scrollTo(0, 0)}
         />

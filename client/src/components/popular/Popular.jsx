@@ -1,13 +1,21 @@
-import "./Popular.css";
-import Item from "../item/Item";
+import axios from "axios";
 import { useEffect, useState } from "react";
+import { BASE_API_URL } from "../../utils/constants";
+import Item from "../item/Item";
+import "./Popular.css";
 const Popular = () => {
   const [data_product, setData_product] = useState([]);
   useEffect(() => {
-    fetch("http://localhost:4000/popularinwomen")
-      .then((response) => response.json())
-      .then((data) => setData_product(data));
+    axios
+      .get(`${BASE_API_URL}/popularinwomen`)
+      .then((response) => {
+        setData_product(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
   }, []);
+
   return (
     <div className="popular">
       <h1>POPULAR IN WOMEN</h1>
