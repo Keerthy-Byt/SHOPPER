@@ -12,7 +12,7 @@ const cartRoutes = require("./routes/cart");
 require("./config");
 
 const port = process.env.PORT || 4000;
-//const port = process.env.PORT || 4000;
+
 require("dotenv").config();
 // to parse whatever request i get from response will automatically  through json
 app.use(express.json());
