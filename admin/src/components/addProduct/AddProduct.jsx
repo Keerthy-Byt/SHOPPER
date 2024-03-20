@@ -50,8 +50,6 @@ const AddProduct = () => {
       // let responseData;
       let product = productDetails;
 
-      let formData = new FormData();
-      formData.append("product", image);
       const { data } = await axios.post(`${BASE_API_URL}/upload`, {
         image,
       });

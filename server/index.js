@@ -2,7 +2,6 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
-//const multer = require("multer");
 const path = require("path"); // to get access to the backend directory in the express app
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
@@ -15,7 +14,11 @@ const port = process.env.PORT || 4000;
 
 require("dotenv").config();
 // to parse whatever request i get from response will automatically  through json
-app.use(express.json());
+app.use(
+  express.json({
+    limit: "1mb",
+  })
+);
 // to connect the project to the express app on port
 app.use(cors());
 
@@ -34,9 +37,9 @@ app.get("/", (req, res) => {
 
 //Creating Upload Endpoint for images
 app.use("/images", express.static("upload/images"));
+
 app.post("/upload", async (req, res) => {
   try {
-    console.log("filename", req.body);
     const response = await cloudinary.uploader.upload(req.body.image, {
       folder: "images",
     });
