@@ -32,11 +32,6 @@ SHOPPER is a basic e-commerce project designed for shopping clothes. It features
 3. View your cart items and the total amount.
 4. Admins can access the admin panel to manage items and categories.
 
-## Deployed Site
-
-You can access the deployed client site [here](https://shopperclientkk.netlify.app).
-
-You can access the deployed admin site [here](https://shopperadminkk.netlify.app/).
 
 ## License
 
